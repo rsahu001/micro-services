@@ -1,0 +1,546 @@
+<html>
+<style>
+    body {
+        margin: 20px;
+    }
+
+    .btn-circle.btn-xl {
+        width: 210px;
+        height: 210px;
+        padding: 15px 8px;
+        font-size: 32px;
+        line-height: 1.33;
+        border-radius: 100px;
+    }
+
+</style>
+<head>
+    <title>Link Traffic Checker</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+          rel="stylesheet">
+
+</head>
+<body>
+
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<table style="width:100%">
+    <tr>
+        <th>
+            <div id="container-speedometer49"
+                 style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto; padding: 4px">
+            </div>
+        </th>
+        <th>
+            <div id="container-speedometer50"
+                 style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto; padding: 4px">
+            </div>
+        </th>
+    </tr>
+    <tr>
+        <th>
+            <div id="container-speedometer51"
+                 style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto; padding: 4px">
+            </div>
+        </th>
+        <th>
+            <div id="container-speedometer52"
+                 style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto; padding: 4px">
+            </div>
+        </th>
+    </tr>
+</table>
+<!--<div id="container-speedometer" style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto ">-->
+<!--</div>-->
+<script>
+
+    var json_data;
+    setInterval(function() {
+
+    $.getJSON('/get_pps', {}, function (data) {
+        $("#result")
+            .text(data.status);
+        console.log (data);
+
+        $("#ping")
+            .text(data.ping);
+{#        console.log(data);#}
+{#        if (parseInt(data['stats']['49'][0]) > 300) {#}
+{#            data_pps = 300;#}
+{#        }#}
+        json_data = data;
+        console.log(json_data['stats']['49']['1']);
+
+
+        json_data['stats']['49']['0'] *= 0.001 ;
+        json_data['stats']['50']['0'] *= 0.001 ;
+        json_data['stats']['51']['0'] *= 0.001 ;
+        json_data['stats']['52']['0'] *= 0.001 ;
+        json_data['stats']['49']['0'] = Math.round(json_data['stats']['49']['0'] * 100) / 100;
+        json_data['stats']['50']['0'] = Math.round(json_data['stats']['50']['0'] * 100) / 100;
+        json_data['stats']['51']['0'] = Math.round(json_data['stats']['51']['0'] * 100) / 100;
+        json_data['stats']['52']['0'] = Math.round(json_data['stats']['52']['0'] * 100) / 100;
+
+    });
+
+    }, 2000);
+
+    Highcharts.chart('container-speedometer49', {
+
+            chart: {
+                type: 'gauge',
+                plotBackgroundColor: null,
+                plotBackgroundImage: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+
+            title: {
+                enabled: false,
+                text: 'TX PPS on Eth 1/49'
+            },
+
+            pane: {
+                startAngle: -150,
+                endAngle: 150,
+                background: [{
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#FFF'],
+                            [1, '#333']
+                        ]
+                    },
+                    borderWidth: 0,
+                    outerRadius: '109%'
+                }, {
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#333'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    borderWidth: 1,
+                    outerRadius: '107%'
+                }, {
+                    // default background
+                }, {
+                    backgroundColor: '#DDD',
+                    borderWidth: 0,
+                    outerRadius: '105%',
+                    innerRadius: '103%'
+                }]
+            },
+
+            // the value axis
+            yAxis: {
+                min: 0,
+                max: 11,
+
+                minorTickInterval: 'auto',
+                minorTickWidth: 1,
+                minorTickLength: 10,
+                minorTickPosition: 'inside',
+                minorTickColor: '#666',
+
+                tickPixelInterval: 30,
+                tickWidth: 2,
+                tickPosition: 'inside',
+                tickLength: 10,
+                tickColor: '#666',
+                labels: {
+                    step: 2,
+                    rotation: 'auto'
+                },
+                title: {
+                    text: ''
+                },
+                plotBands: [{
+                    from: 0,
+                    to: 7,
+                    color: '#55BF3B' // green
+                }, {
+                    from: 7,
+                    to: 9,
+                    color: '#DDDF0D' // yellow
+                }, {
+                    from: 9,
+                    to: 11,
+                    color: '#DF5353' // red
+                }]
+            },
+
+            series: [{
+                name: 'PPS is ',
+                data: [0],
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }],
+            exporting: {enabled: false},
+            credits: {enabled: false}
+
+        },
+        function (chart) {
+            if (!chart.renderer.forExport) {
+                setInterval(function () {
+                    var point = chart.series[0].points[0],
+                        newVal,
+                        inc = Math.round((Math.random() - 0.5) * 20);
+
+                    newVal = point.y + inc;
+                    if (newVal < 0 || newVal > 50) {
+                        newVal = point.y - inc;
+                    }
+                    point.update(parseFloat(json_data['stats']['49'][0]));
+                }, 1000);
+            }
+        });
+
+    Highcharts.chart('container-speedometer50', {
+
+            chart: {
+                type: 'gauge',
+                plotBackgroundColor: null,
+                plotBackgroundImage: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+
+            title: {
+                enabled: false,
+                text: 'TX PPS on Eth 1/50'
+            },
+
+            pane: {
+                startAngle: -150,
+                endAngle: 150,
+                background: [{
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#FFF'],
+                            [1, '#333']
+                        ]
+                    },
+                    borderWidth: 0,
+                    outerRadius: '109%'
+                }, {
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#333'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    borderWidth: 1,
+                    outerRadius: '107%'
+                }, {
+                    // default background
+                }, {
+                    backgroundColor: '#DDD',
+                    borderWidth: 0,
+                    outerRadius: '105%',
+                    innerRadius: '103%'
+                }]
+            },
+
+            // the value axis
+            yAxis: {
+                min: 0,
+                max: 11,
+
+                minorTickInterval: 'auto',
+                minorTickWidth: 1,
+                minorTickLength: 10,
+                minorTickPosition: 'inside',
+                minorTickColor: '#666',
+
+                tickPixelInterval: 30,
+                tickWidth: 2,
+                tickPosition: 'inside',
+                tickLength: 10,
+                tickColor: '#666',
+                labels: {
+                    step: 2,
+                    rotation: 'auto'
+                },
+                title: {
+                    text: ''
+                },
+                plotBands: [{
+                    from: 0,
+                    to: 7,
+                    color: '#55BF3B' // green
+                }, {
+                    from: 7,
+                    to: 9,
+                    color: '#DDDF0D' // yellow
+                }, {
+                    from: 9,
+                    to: 11,
+                    color: '#DF5353' // red
+                }]
+            },
+
+            series: [{
+                name: 'PPS is ',
+                data: [0],
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }],
+            exporting: {enabled: false},
+            credits: {enabled: false}
+
+        },
+        function (chart) {
+            if (!chart.renderer.forExport) {
+                setInterval(function () {
+                    var point = chart.series[0].points[0],
+                        newVal,
+                        inc = Math.round((Math.random() - 0.5) * 20);
+
+                    newVal = point.y + inc;
+                    if (newVal < 0 || newVal > 50) {
+                        newVal = point.y - inc;
+                    }
+                    point.update(parseFloat(json_data['stats']['50'][0]));
+                }, 1000);
+            }
+        });
+
+    Highcharts.chart('container-speedometer51', {
+
+            chart: {
+                type: 'gauge',
+                plotBackgroundColor: null,
+                plotBackgroundImage: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+
+            title: {
+                enabled: false,
+                text: 'TX PPS on Eth 1/51'
+            },
+
+            pane: {
+                startAngle: -150,
+                endAngle: 150,
+                background: [{
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#FFF'],
+                            [1, '#333']
+                        ]
+                    },
+                    borderWidth: 0,
+                    outerRadius: '109%'
+                }, {
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#333'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    borderWidth: 1,
+                    outerRadius: '107%'
+                }, {
+                    // default background
+                }, {
+                    backgroundColor: '#DDD',
+                    borderWidth: 0,
+                    outerRadius: '105%',
+                    innerRadius: '103%'
+                }]
+            },
+
+            // the value axis
+            yAxis: {
+                min: 0,
+                max: 11,
+
+                minorTickInterval: 'auto',
+                minorTickWidth: 1,
+                minorTickLength: 10,
+                minorTickPosition: 'inside',
+                minorTickColor: '#666',
+
+                tickPixelInterval: 30,
+                tickWidth: 2,
+                tickPosition: 'inside',
+                tickLength: 10,
+                tickColor: '#666',
+                labels: {
+                    step: 2,
+                    rotation: 'auto'
+                },
+                title: {
+                    text: ''
+                },
+                plotBands: [{
+                    from: 0,
+                    to: 7,
+                    color: '#55BF3B' // green
+                }, {
+                    from: 7,
+                    to: 9,
+                    color: '#DDDF0D' // yellow
+                }, {
+                    from: 9,
+                    to: 11,
+                    color: '#DF5353' // red
+                }]
+            },
+
+            series: [{
+                name: 'PPS is ',
+                data: [0],
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }],
+            exporting: {enabled: false},
+            credits: {enabled: false}
+
+        },
+        function (chart) {
+            if (!chart.renderer.forExport) {
+                setInterval(function () {
+                    var point = chart.series[0].points[0],
+                        newVal,
+                        inc = Math.round((Math.random() - 0.5) * 20);
+
+                    newVal = point.y + inc;
+                    if (newVal < 0 || newVal > 50) {
+                        newVal = point.y - inc;
+                    }
+                    point.update(parseFloat(json_data['stats']['51'][0]));
+                }, 1000);
+            }
+        });
+
+    Highcharts.chart('container-speedometer52', {
+
+            chart: {
+                type: 'gauge',
+                plotBackgroundColor: null,
+                plotBackgroundImage: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+
+            title: {
+                enabled: false,
+                text: 'TX PPS on Eth 1/52'
+            },
+
+            pane: {
+                startAngle: -150,
+                endAngle: 150,
+                background: [{
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#FFF'],
+                            [1, '#333']
+                        ]
+                    },
+                    borderWidth: 0,
+                    outerRadius: '109%'
+                }, {
+                    backgroundColor: {
+                        linearGradient: {x1: 0, y1: 0, x2: 0, y2: 1},
+                        stops: [
+                            [0, '#333'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    borderWidth: 1,
+                    outerRadius: '107%'
+                }, {
+                    // default background
+                }, {
+                    backgroundColor: '#DDD',
+                    borderWidth: 0,
+                    outerRadius: '105%',
+                    innerRadius: '103%'
+                }]
+            },
+
+            // the value axis
+            yAxis: {
+                min: 0,
+                max: 11,
+
+                minorTickInterval: 'auto',
+                minorTickWidth: 1,
+                minorTickLength: 10,
+                minorTickPosition: 'inside',
+                minorTickColor: '#666',
+
+                tickPixelInterval: 30,
+                tickWidth: 2,
+                tickPosition: 'inside',
+                tickLength: 10,
+                tickColor: '#666',
+                labels: {
+                    step: 2,
+                    rotation: 'auto'
+                },
+                title: {
+                    text: ''
+                },
+                plotBands: [{
+                    from: 0,
+                    to: 7,
+                    color: '#55BF3B' // green
+                }, {
+                    from: 7,
+                    to: 9,
+                    color: '#DDDF0D' // yellow
+                }, {
+                    from: 9,
+                    to: 11,
+                    color: '#DF5353' // red
+                }]
+            },
+
+            series: [{
+                name: 'PPS is ',
+                data: [0],
+                tooltip: {
+                    valueSuffix: ''
+                }
+            }],
+            exporting: {enabled: false},
+            credits: {enabled: false}
+
+        },
+        function (chart) {
+            if (!chart.renderer.forExport) {
+                setInterval(function () {
+                    var point = chart.series[0].points[0],
+                        newVal,
+                        inc = Math.round((Math.random() - 0.5) * 20);
+
+                    newVal = point.y + inc;
+                    if (newVal < 0 || newVal > 50) {
+                        newVal = point.y - inc;
+                    }
+                    /// update here
+                    point.update(parseFloat(json_data['stats']['52'][0]));
+                }, 1000);
+            }
+        });
+</script>
+</body>
+</html>

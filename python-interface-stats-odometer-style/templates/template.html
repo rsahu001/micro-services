@@ -1,0 +1,199 @@
+<html>
+<style>
+    body{margin:20px;}
+    .btn-circle.btn-xl {
+        width: 210px;
+        height: 210px;
+        padding: 15px 8px;
+        font-size: 32px;
+        line-height: 1.33;
+        border-radius: 100px;
+    }
+
+</style>
+<head>
+    <title>Link checker</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
+          rel="stylesheet">
+
+</head>
+<body>
+
+<!--<div class="container">-->
+<!--<div class="header">-->
+<!--<h3> <span class="text-muted">Service connectivity:</span>-->
+<!--<span id="result" class="">?</span>-->
+<!--</h3>-->
+<!--<h3>-->
+<!--<span class="text-muted">Round Trip Time (msec)  </span> <span id="ping"></span>-->
+<!--</h3>-->
+<!--</div>-->
+<!--<hr/>-->
+<!--</div>-->
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts-more.js"></script>
+<script src="https://code.highcharts.com/modules/exporting.js"></script>
+
+<table style="width:100%">
+    <tr>
+        <!--style="text-align: center;"-->
+        <th  class="highcharts-title";
+             style="text-align: center; color:#333333;font-size:18px;fill:#333333;"> Service Connectivity<br><br><br>
+            <!--<th><text x="200" text-anchor="middle" class="highcharts-title" style="color:#333333;font-size:18px;fill:#333333;" y="24">-->
+                <!--Service Connectivity</text>-->
+            <button type="button" id="btn-l" class="btn btn-danger btn-circle btn-xl" style="padding: -10px">
+                <i id="glyph" class="glyphicon glyphicon-remove"></i></button>
+        </th>
+        <th><div id="container-speedometer" style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto; padding: 4px">
+        </div></th>
+    </tr>
+</table>
+<!--<div id="container-speedometer" style="align-content:left; min-width: 310px; max-width: 400px; height: 300px; margin: 0 auto ">-->
+<!--</div>-->
+<script>
+
+
+
+
+    Highcharts.chart('container-speedometer', {
+
+            chart: {
+                type: 'gauge',
+                plotBackgroundColor: null,
+                plotBackgroundImage: null,
+                plotBorderWidth: 0,
+                plotShadow: false
+            },
+
+            title: {
+                enabled: false,
+                text: 'Round Trip Time (msec)'
+            },
+
+            pane: {
+                startAngle: -150,
+                endAngle: 150,
+                background: [{
+                    backgroundColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, '#FFF'],
+                            [1, '#333']
+                        ]
+                    },
+                    borderWidth: 0,
+                    outerRadius: '109%'
+                }, {
+                    backgroundColor: {
+                        linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                        stops: [
+                            [0, '#333'],
+                            [1, '#FFF']
+                        ]
+                    },
+                    borderWidth: 1,
+                    outerRadius: '107%'
+                }, {
+                    // default background
+                }, {
+                    backgroundColor: '#DDD',
+                    borderWidth: 0,
+                    outerRadius: '105%',
+                    innerRadius: '103%'
+                }]
+            },
+
+            // the value axis
+            yAxis: {
+                min: 0,
+                max: 300,
+
+                minorTickInterval: 'auto',
+                minorTickWidth: 1,
+                minorTickLength: 10,
+                minorTickPosition: 'inside',
+                minorTickColor: '#666',
+
+                tickPixelInterval: 30,
+                tickWidth: 2,
+                tickPosition: 'inside',
+                tickLength: 10,
+                tickColor: '#666',
+                labels: {
+                    step: 2,
+                    rotation: 'auto'
+                },
+                title: {
+                    text: ''
+                },
+                plotBands: [{
+                    from: 0,
+                    to: 160,
+                    color: '#55BF3B' // green
+                }, {
+                    from: 160,
+                    to: 250,
+                    color: '#DDDF0D' // yellow
+                }, {
+                    from: 250,
+                    to: 300,
+                    color: '#DF5353' // red
+                }]
+            },
+
+            series: [{
+                name: 'Delay is ',
+                data: [0],
+                tooltip: {
+                    valueSuffix: 'ms'
+                }
+            }],
+            exporting: { enabled: false },
+            credits: {enabled: false}
+
+        },
+        function (chart) {
+            if (!chart.renderer.forExport) {
+                setInterval(function () {
+                    var point = chart.series[0].points[0],
+                        newVal,
+                        inc = Math.round((Math.random() - 0.5) * 20);
+
+                    newVal = point.y + inc;
+                    if (newVal < 0 || newVal > 200) {
+                        newVal = point.y - inc;
+                    }
+
+                    $.getJSON('/get_status', {}, function(data) {
+                        $("#result")
+                            .text(data.status)
+                            .removeClass('label label-warning')
+                            .removeClass('label label-success')
+                            .addClass(data.lbl_class);
+                        $("#btn-l")
+                            .removeClass('btn-warning')
+                            .removeClass('btn-success')
+                            .addClass(data.btn_class);
+                        if (data.btn_class == 'btn btn-warning btn-circle btn-xl') {
+                            $("#glyph").removeClass('glyphicon-ok').addClass('glyphicon-remove')
+                        }
+                        else {
+                            $("#glyph").removeClass('glyphicon-remove').addClass('glyphicon-ok')
+                        }
+                        $("#ping")
+                            .text(data.ping);
+                        data_ping = parseInt(data.ping);
+                        if (data_ping > 300) {
+                            data_ping = 300;
+                        }
+                    });
+                    point.update(data_ping);
+
+                }, 1000);
+            }
+        });
+
+</script>
+</body>
+</html>
